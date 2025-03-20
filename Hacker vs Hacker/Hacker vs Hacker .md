@@ -6,23 +6,23 @@ We start with Nmap
 
 Finds 2 open ports. SSH running on port 22 and web server on port 80.
 
-![image.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/image.png)
+![image.png](image.png)
 
 Looking at the webpage we find a file upload section. We quickly upload our `php-reverse-shell.php` file.
 
-![page.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/page.png)
+![page.png](page.png)
 
 But we get back a message.
 
-![image.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/image%201.png)
+![image.png](image%201.png)
 
 Looking at the source code we find a code snippet for filtering uploads. The code verifies if there is “.pdf“ in the file name and the directory where the uploaded files are stored : `cvs/` . 
 
-![source.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/source.png)
+![source.png](source.png)
 
 A change to our filename to `php-reverse-shell.pdf.php`  and upload. Still gets back the same message. Next we try opening the cvs directory. But directory listing is disabled.
 
-![cvs.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/d0e66d33-c935-4abc-9f7c-507692cd8794.png)
+![cvs.png](d0e66d33-c935-4abc-9f7c-507692cd8794.png)
 
 We try fuzzing the directory for files with extension `.pdf.php` , to see if our file has been uploaded.
 
@@ -30,33 +30,33 @@ We try fuzzing the directory for files with extension `.pdf.php` , to see if our
 
 To our surprise we see another file  `shell.pdf.php` . Since the story behind the machine is that it has already been exploited and we are trying to regain control, existence of such a file is possible.
 
-![image.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/image%202.png)
+![image.png](image%202.png)
 
 Running commands on that file returns results as expected.
 
 [`http://10.10.54.39/cvs/shell.pdf.php?cmd=ls](http://10.10.54.39/cvs/shell.pdf.php?cmd=ls);`
 
-![image.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/image%203.png)
+![image.png](image%203.png)
 
 Retrieving the `/etc/passwd`  file reveals the username `lachlan` .
 
-![image.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/image%204.png)
+![image.png](image%204.png)
 
 And we get the first flag from the users folder.
 
-![image.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/image%205.png)
+![image.png](image%205.png)
 
 Reading the `.bash_history` file shows a cron job `persistence`  and an attempt to change password.
 
-![image.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/image%206.png)
+![image.png](image%206.png)
 
 Using the username and password we were able to login using SSH. But even before being able to run any commands we were getting kicked out along with a message “nope”. This might be the cron job the hacker has implemented to maintain persistence.
 
-![image.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/image%207.png)
+![image.png](image%207.png)
 
 Looking at it we can see the path being set to `/home/lachlan/bin`  as the first one. (Not a good idea!)
 
-![image.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/image%208.png)
+![image.png](image%208.png)
 
 Quick search and got a breakdown on the code:
 
@@ -74,7 +74,7 @@ We use -T flag of `ssh` ,
 
 `-T      Disable pseudo-tty allocation`
 
-![image.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/image%209.png)
+![image.png](image%209.png)
 
 We get a shell not interactive like bash or sh, but still can run commands.
 
@@ -84,8 +84,8 @@ The hacker is using `pkill` to kill the sessions and the file path given first i
 
 `chmod  +x pkill` 
 
-![image.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/image%2010.png)
+![image.png](image%2010.png)
 
 The process is run as root. So we get a root shell back.
 
-![image.png](Hacker%20vs%20Hacker%201ba2d0541948801aa7d0ffadcba25ce4/image%2011.png)
+![image.png](image%2011.png)
