@@ -65,5 +65,3 @@ Quick search in google takes us to a GitHub repository with the exploit.
 Running it gets us the root access and the final flag.
 
 ![image.png](image%2012.png)
-
-
